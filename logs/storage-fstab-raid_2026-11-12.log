@@ -1,0 +1,822 @@
+Script started on 2026-11-12 11:25:54+02:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="104" LINES="32"]
+damian@rocky:~$ sudo -i
+[sudo] password for damian:
+[root@rocky ~]# date
+Thu Nov 12 11:26:20 AM EET 2026
+[root@rocky ~]# timedatectl
+               Local time: Thu 2026-11-12 11:26:32 EET
+           Universal time: Thu 2026-11-12 09:26:32 UTC
+                 RTC time: Thu 2026-11-12 09:26:32
+                Time zone: Europe/Bucharest (EET, +0200)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+[root@rocky ~]# lsblk
+NAME         MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda            8:0    0   20G  0 disk
+├─sda1         8:1    0    1G  0 part /boot
+└─sda2         8:2    0   19G  0 part
+  ├─rlm-root 253:0    0   17G  0 lvm  /
+  └─rlm-swap 253:1    0    2G  0 lvm  [SWAP]
+sr0           11:0    1 1024M  0 rom
+[root@rocky ~]# losetup -a
+[root@rocky ~]# cat /proc/mdstat
+Personalities :
+unused devices: <none>
+[root@rocky ~]# vgs
+  VG  #PV #LV #SN Attr   VSize   VFree
+  rlm   1   2   0 wz--n- <19.00g    0
+[root@rocky ~]# ls 0la /mnt/
+ls: cannot access '0la': No such file or directory
+/mnt/:
+data  logs  luks_test
+[root@rocky ~]# df -hT
+Filesystem           Type      Size  Used Avail Use% Mounted on
+devtmpfs             devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                tmpfs     1.8G     0  1.8G   0% /dev/shm
+tmpfs                tmpfs     732M  8.6M  723M   2% /run
+/dev/mapper/rlm-root xfs        17G  2.8G   15G  17% /
+/dev/sda1            xfs       960M  497M  464M  52% /boot
+tmpfs                tmpfs     366M     0  366M   0% /run/user/1000
+[root@rocky ~]# cat /etc/fstab
+
+#
+# /etc/fstab
+# Created by anaconda on Wed Jul 29 17:49:02 2026
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk/'.
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
+#
+# After editing this file, run 'systemctl daemon-reload' to update systemd
+# units generated from this file.
+#
+/dev/mapper/rlm-root    /                       xfs     defaults        0 0
+UUID=188e5165-0c0a-43d1-aae6-200370f664f3 /boot                   xfs     defaults        0 0
+/dev/mapper/rlm-swap    none                    swap    defaults        0 0
+[root@rocky ~]# ls -la /mnt/
+total 0
+drwxr-xr-x.  5 root root  47 Oct 24 15:10 .
+dr-xr-xr-x. 19 root root 271 Sep  7 15:07 ..
+drwxr-xr-x.  2 root root   6 Oct 24 15:10 data
+drwxr-xr-x.  2 root root   6 Oct 24 15:10 logs
+drwxr-xr-x.  2 root root   6 Aug 10 20:26 luks_test
+[root@rocky ~]# date
+Thu Nov 12 11:28:53 AM EET 2026
+[root@rocky ~]# date
+Thu Nov 12 11:33:28 AM EET 2026
+[root@rocky ~]# mkdir -p /root/lab01
+[root@rocky ~]# trucate -s 600M /root/lab01/disk0.img /root/lab01/disk1.img
+-bash: trucate: command not found
+[root@rocky ~]# truncate -s 600M /root/lab01/disk0.img /root/lab01/disk1.img
+[root@rocky ~]# truncate -s 300M /root/lab01/disk2.img /root/lab01/disk3.img
+[root@rocky ~]# truncate -s 300M /root/lab01/disk4.img
+[root@rocky ~]# ls -lh /root/lab01/
+total 0
+-rw-r--r--. 1 root root 600M Nov 12 11:35 disk0.img
+-rw-r--r--. 1 root root 600M Nov 12 11:35 disk1.img
+-rw-r--r--. 1 root root 300M Nov 12 11:35 disk2.img
+-rw-r--r--. 1 root root 300M Nov 12 11:35 disk3.img
+-rw-r--r--. 1 root root 300M Nov 12 11:36 disk4.img
+[root@rocky ~]# losetup -f --show /root/lab01/disk0.img
+/dev/loop0
+[root@rocky ~]# losetup -f --show /root/lab01/disk1.img
+/dev/loop1
+[root@rocky ~]# losetup -f --show /root/lab01/disk2.img
+/dev/loop2
+[root@rocky ~]# losetup -f --show /root/lab01/disk3.img
+/dev/loop3
+[root@rocky ~]# losetup -f --show /root/lab01/disk4.img
+/dev/loop4
+[root@rocky ~]# losetup -a
+/dev/loop1: [64768]:16797454 (/root/lab01/disk1.img)
+/dev/loop4: [64768]:16797462 (/root/lab01/disk4.img)
+/dev/loop2: [64768]:16797459 (/root/lab01/disk2.img)
+/dev/loop0: [64768]:16797445 (/root/lab01/disk0.img)
+/dev/loop3: [64768]:16797461 (/root/lab01/disk3.img)
+[root@rocky ~]# lsblk
+NAME         MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+loop0          7:0    0  600M  0 loop
+loop1          7:1    0  600M  0 loop
+loop2          7:2    0  300M  0 loop
+loop3          7:3    0  300M  0 loop
+loop4          7:4    0  300M  0 loop
+sda            8:0    0   20G  0 disk
+├─sda1         8:1    0    1G  0 part /boot
+└─sda2         8:2    0   19G  0 part
+  ├─rlm-root 253:0    0   17G  0 lvm  /
+  └─rlm-swap 253:1    0    2G  0 lvm  [SWAP]
+sr0           11:0    1 1024M  0 rom
+[root@rocky ~]# date
+Thu Nov 12 11:37:37 AM EET 2026
+[root@rocky ~]# date
+Thu Nov 12 11:38:48 AM EET 2026
+[root@rocky ~]# pvcreate /dev/loop0
+  Physical volume "/dev/loop0" successfully created.
+[root@rocky ~]# vgcreate labvg /dev/loop0
+  Volume group "labvg" successfully created
+[root@rocky ~]# lvcreate -L 400M -n data labvg
+  Logical volume "data" created.
+[root@rocky ~]# lvcreate -L 150M -n logs labvg
+  Rounding up size to full physical extent 152.00 MiB
+  Logical volume "logs" created.
+[root@rocky ~]# pvs
+  PV         VG    Fmt  Attr PSize   PFree
+  /dev/loop0 labvg lvm2 a--  596.00m 44.00m
+  /dev/sda2  rlm   lvm2 a--  <19.00g     0
+[root@rocky ~]# vgs
+  VG    #PV #LV #SN Attr   VSize   VFree
+  labvg   1   2   0 wz--n- 596.00m 44.00m
+  rlm     1   2   0 wz--n- <19.00g     0
+[root@rocky ~]# lvs
+  LV   VG    Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  data labvg -wi-a----- 400.00m
+  logs labvg -wi-a----- 152.00m
+  root rlm   -wi-ao---- <17.00g
+  swap rlm   -wi-ao----   2.00g
+[root@rocky ~]# mkfs -t xfs /dev/labvg/data
+meta-data=/dev/labvg/data        isize=512    agcount=4, agsize=25600 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
+data     =                       bsize=4096   blocks=102400, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=16384, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+Discarding blocks...Done.
+[root@rocky ~]# mkfs -t ext4 /dev/labvg/logs
+mke2fs 1.46.5 (30-Dec-2021)
+Discarding device blocks: done
+Creating filesystem with 155648 1k blocks and 38912 inodes
+Filesystem UUID: c7c4353b-a233-4a80-8142-476f5113a5f7
+Superblock backups stored on blocks:
+	8193, 24577, 40961, 57345, 73729
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+[root@rocky ~]# mkdir -p /mnt/data /mnt/logs
+[root@rocky ~]# mount /dev/labvg/data /mnt/data
+[root@rocky ~]# mount /dev/labvg/logs /mnt/logs
+[root@rocky ~]# df -hT
+Filesystem             Type      Size  Used Avail Use% Mounted on
+devtmpfs               devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                  tmpfs     1.8G     0  1.8G   0% /dev/shm
+tmpfs                  tmpfs     732M  8.6M  723M   2% /run
+/dev/mapper/rlm-root   xfs        17G  2.9G   15G  17% /
+/dev/sda1              xfs       960M  497M  464M  52% /boot
+tmpfs                  tmpfs     366M     0  366M   0% /run/user/1000
+/dev/mapper/labvg-data xfs       336M   23M  314M   7% /mnt/data
+/dev/mapper/labvg-logs ext4      137M   14K  127M   1% /mnt/logs
+[root@rocky ~]# cp /etc/fstab /etc/fstab.lab01.bak
+[root@rocky ~]# echo "UUID=$(blkid -s UUID -o value /dev/labvg/data) /mnt/data xfs defaults,nofail 0 0" >> /etc/fstab
+[root@rocky ~]# echo "UUID=$(blkid -s UUID -o value /dev/labvg/logs) /mnt/logs ext4 defaults,nofail 0 0" >> /etc/fstab
+[root@rocky ~]# systemctl daemon-reload
+[root@rocky ~]# umount /mnt/data /mnt/logs
+[root@rocky ~]# df -hT
+Filesystem           Type      Size  Used Avail Use% Mounted on
+devtmpfs             devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                tmpfs     1.8G     0  1.8G   0% /dev/shm
+tmpfs                tmpfs     732M  8.6M  723M   2% /run
+/dev/mapper/rlm-root xfs        17G  2.9G   15G  17% /
+/dev/sda1            xfs       960M  497M  464M  52% /boot
+tmpfs                tmpfs     366M     0  366M   0% /run/user/1000
+[root@rocky ~]# mount -a
+[root@rocky ~]# df -hT
+Filesystem             Type      Size  Used Avail Use% Mounted on
+devtmpfs               devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                  tmpfs     1.8G     0  1.8G   0% /dev/shm
+tmpfs                  tmpfs     732M  8.6M  723M   2% /run
+/dev/mapper/rlm-root   xfs        17G  2.9G   15G  17% /
+/dev/sda1              xfs       960M  497M  464M  52% /boot
+tmpfs                  tmpfs     366M     0  366M   0% /run/user/1000
+/dev/mapper/labvg-data xfs       336M   23M  314M   7% /mnt/data
+/dev/mapper/labvg-logs ext4      137M   14K  127M   1% /mnt/logs
+[root@rocky ~]# date
+Thu Nov 12 11:46:19 AM EET 2026
+[root@rocky ~]# vim /etc/fstab
+
+[vim: full-screen editor output removed]
+[root@rocky ~]# cat /etc/fstab
+
+#
+# /etc/fstab
+# Created by anaconda on Wed Jul 29 17:49:02 2026
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk/'.
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
+#
+# After editing this file, run 'systemctl daemon-reload' to update systemd
+# units generated from this file.
+#
+/dev/mapper/rlm-root    /                       xfs     defaults        0 0
+UUID=188e5165-0c0a-43d1-aae6-200370f664f3 /boot                   xfs     defaults        0 0
+/dev/mapper/rlm-swap    none                    swap    defaults        0 0
+UUID=98a96710-9d24-457d-a025-96704260d147 /mnt/data xfs defaults,nofail 0 0
+UUID=c7c4353b-a233-4a80-8142-476f5113a5f7 /mnt/logs ext4 defaults,nofail 0 2
+[root@rocky ~]# systemctl daemon-reload
+[root@rocky ~]# date
+Thu Nov 12 11:50:22 AM EET 2026
+[root@rocky ~]# pvcreate /dev/loop1
+  Physical volume "/dev/loop1" successfully created.
+[root@rocky ~]# vgextend labvg /dev/loop1
+  Volume group "labvg" successfully extended
+[root@rocky ~]# vgs
+  VG    #PV #LV #SN Attr   VSize   VFree
+  labvg   2   2   0 wz--n-   1.16g 640.00m
+  rlm     1   2   0 wz--n- <19.00g      0
+[root@rocky ~]# lvextend -L +300M /dev/labvg/data
+  Size of logical volume labvg/data changed from 400.00 MiB (100 extents) to 700.00 MiB (175 extents).
+  Logical volume labvg/data successfully resized.
+[root@rocky ~]# df -hT /mnt/data
+Filesystem             Type  Size  Used Avail Use% Mounted on
+/dev/mapper/labvg-data xfs   336M   23M  314M   7% /mnt/data
+[root@rocky ~]# xfs_growfs /mnt/data
+meta-data=/dev/mapper/labvg-data isize=512    agcount=4, agsize=25600 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
+data     =                       bsize=4096   blocks=102400, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=16384, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+data blocks changed from 102400 to 179200
+[root@rocky ~]# lvextend -L +100M /dev/labvg/logs
+  Size of logical volume labvg/logs changed from 152.00 MiB (38 extents) to 252.00 MiB (63 extents).
+  Logical volume labvg/logs successfully resized.
+[root@rocky ~]# resize2fs /dev/labvg/logs
+resize2fs 1.46.5 (30-Dec-2021)
+Filesystem at /dev/labvg/logs is mounted on /mnt/logs; on-line resizing required
+old_desc_blocks = 2, new_desc_blocks = 2
+The filesystem on /dev/labvg/logs is now 258048 (1k) blocks long.
+
+[root@rocky ~]# lvs
+  LV   VG    Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  data labvg -wi-ao---- 700.00m
+  logs labvg -wi-ao---- 252.00m
+  root rlm   -wi-ao---- <17.00g
+  swap rlm   -wi-ao----   2.00g
+[root@rocky ~]# df -hT
+Filesystem             Type      Size  Used Avail Use% Mounted on
+devtmpfs               devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                  tmpfs     1.8G     0  1.8G   0% /dev/shm
+tmpfs                  tmpfs     732M  8.6M  723M   2% /run
+/dev/mapper/rlm-root   xfs        17G  2.9G   15G  17% /
+/dev/sda1              xfs       960M  497M  464M  52% /boot
+tmpfs                  tmpfs     366M     0  366M   0% /run/user/1000
+/dev/mapper/labvg-data xfs       636M   25M  612M   4% /mnt/data
+/dev/mapper/labvg-logs ext4      230M   14K  216M   1% /mnt/logs
+[root@rocky ~]# date
+Thu Nov 12 11:53:47 AM EET 2026
+[root@rocky ~]# date
+Thu Nov 12 11:55:33 AM EET 2026
+[root@rocky ~]# cp -r /etc /mnt/data/
+[root@rocky ~]# du -sh /mnt/data/etc
+24M	/mnt/data/etc
+[root@rocky ~]# mkdir -p /root/lab01/backup
+[root@rocky ~]# tar -czf /root/lab01/backup/data.tar.gz -C /mnt/data .
+[root@rocky ~]# tar -cjf /root/lab01/backup/data.tar.bz2 -C /mnt/data .
+[root@rocky ~]# tar -cJf /root/lab01/backup/data.tar.xz -C /mnt/data .
+[root@rocky ~]# ls -lh /root/lab01/backup/
+total 12M
+-rw-r--r--. 1 root root 4.0M Nov 12 11:57 data.tar.bz2
+-rw-r--r--. 1 root root 4.9M Nov 12 11:57 data.tar.gz
+-rw-r--r--. 1 root root 3.0M Nov 12 11:58 data.tar.xz
+[root@rocky ~]# tar -tzf /root/lab01/backup/data.tar.gz | head -5
+./
+./etc/
+./etc/sgml/
+./etc/sgml/docbook/
+./etc/sgml/docbook/xmlcatalog
+[root@rocky ~]# tar -tjf /root/lab01/backup/data.tar.bz2 | head -5
+./
+./etc/
+./etc/sgml/
+./etc/sgml/docbook/
+./etc/sgml/docbook/xmlcatalog
+[root@rocky ~]# tar -tJf /root/lab01/backup/data.tar.xz | head -5
+./
+./etc/
+./etc/sgml/
+./etc/sgml/docbook/
+./etc/sgml/docbook/xmlcatalog
+[root@rocky ~]# mkdir -p /root/lab01/restore
+[root@rocky ~]# tar -xJf /root/lab01/backup/data.tar.xz -C /root/lab01/restore
+[root@rocky ~]# ls -la /root/lab01/restore/
+total 12
+drwxr-xr-x.  3 root root   17 Nov 12 11:55 .
+drwxr-xr-x.  4 root root  120 Nov 12 11:59 ..
+drwxr-xr-x. 91 root root 8192 Nov 12 11:55 etc
+[root@rocky ~]# du -sh /root/lab01/restore/etc
+24M	/root/lab01/restore/etc
+[root@rocky ~]# date
+Thu Nov 12 12:01:13 PM EET 2026
+[root@rocky ~]# date
+Thu Nov 12 12:04:22 PM EET 2026
+[root@rocky ~]# mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/loop2 /dev/loop3
+To optimize recovery speed, it is recommended to enable write-intent bitmap, do you want to enable it now? [y/N]? y
+mdadm: Note: this array has metadata at the start and
+    may not be suitable as a boot device.  If you plan to
+    store '/boot' on this device please ensure that
+    your boot-loader understands md/v1.x metadata, or use
+    --metadata=0.90
+Continue creating array [y/N]? y
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+[root@rocky ~]# lsblk
+NAME         MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINTS
+loop0          7:0    0  600M  0 loop
+├─labvg-data 253:2    0  700M  0 lvm   /mnt/data
+└─labvg-logs 253:3    0  252M  0 lvm   /mnt/logs
+loop1          7:1    0  600M  0 loop
+├─labvg-data 253:2    0  700M  0 lvm   /mnt/data
+└─labvg-logs 253:3    0  252M  0 lvm   /mnt/logs
+loop2          7:2    0  300M  0 loop
+└─md0          9:0    0  299M  0 raid1
+loop3          7:3    0  300M  0 loop
+└─md0          9:0    0  299M  0 raid1
+loop4          7:4    0  300M  0 loop
+sda            8:0    0   20G  0 disk
+├─sda1         8:1    0    1G  0 part  /boot
+└─sda2         8:2    0   19G  0 part
+  ├─rlm-root 253:0    0   17G  0 lvm   /
+  └─rlm-swap 253:1    0    2G  0 lvm   [SWAP]
+sr0           11:0    1 1024M  0 rom
+[root@rocky ~]# lvs -o +devices
+  LV   VG    Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert Devices
+  data labvg -wi-ao---- 700.00m                                                     /dev/loop0(0)
+  data labvg -wi-ao---- 700.00m                                                     /dev/loop0(138)
+  data labvg -wi-ao---- 700.00m                                                     /dev/loop1(0)
+  logs labvg -wi-ao---- 252.00m                                                     /dev/loop0(100)
+  logs labvg -wi-ao---- 252.00m                                                     /dev/loop1(64)
+  root rlm   -wi-ao---- <17.00g                                                     /dev/sda2(512)
+  swap rlm   -wi-ao----   2.00g                                                     /dev/sda2(0)
+[root@rocky ~]# vgdisplay
+  --- Volume group ---
+  VG Name               rlm
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                2
+  Open LV               2
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               <19.00 GiB
+  PE Size               4.00 MiB
+  Total PE              4863
+  Alloc PE / Size       4863 / <19.00 GiB
+  Free  PE / Size       0 / 0
+  VG UUID               JiTzsW-R9Le-amGF-JXqD-0fqI-AbJR-lKZABf
+
+  --- Volume group ---
+  VG Name               labvg
+  System ID
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  6
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                2
+  Open LV               2
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               1.16 GiB
+  PE Size               4.00 MiB
+  Total PE              298
+  Alloc PE / Size       238 / 952.00 MiB
+  Free  PE / Size       60 / 240.00 MiB
+  VG UUID               RJppR5-4GWn-BSnY-zkmG-tgyx-wVmV-JwWaQE
+
+[root@rocky ~]# lvdisplay
+  --- Logical volume ---
+  LV Path                /dev/rlm/swap
+  LV Name                swap
+  VG Name                rlm
+  LV UUID                pdz5TK-ccmM-HWoX-ehZ5-RfcO-d2fU-HZGPkk
+  LV Write Access        read/write
+  LV Creation host, time localhost.localdomain, 2026-07-29 20:48:56 +0300
+  LV Status              available
+  # open                 2
+  LV Size                2.00 GiB
+  Current LE             512
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:1
+
+  --- Logical volume ---
+  LV Path                /dev/rlm/root
+  LV Name                root
+  VG Name                rlm
+  LV UUID                qbA81t-3Rrg-KS9O-t04g-Nkir-vt3n-jCgoWF
+  LV Write Access        read/write
+  LV Creation host, time localhost.localdomain, 2026-07-29 20:48:57 +0300
+  LV Status              available
+  # open                 1
+  LV Size                <17.00 GiB
+  Current LE             4351
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:0
+
+  --- Logical volume ---
+  LV Path                /dev/labvg/data
+  LV Name                data
+  VG Name                labvg
+  LV UUID                6igeSl-0HWI-SwUX-Bvqi-eZ7K-H8YK-k03W4K
+  LV Write Access        read/write
+  LV Creation host, time rocky, 2026-11-12 11:39:43 +0200
+  LV Status              available
+  # open                 1
+  LV Size                700.00 MiB
+  Current LE             175
+  Segments               3
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:2
+
+  --- Logical volume ---
+  LV Path                /dev/labvg/logs
+  LV Name                logs
+  VG Name                labvg
+  LV UUID                HxOlqv-a3zW-Cvom-O2M9-2Kdk-cQ0u-y6j2cR
+  LV Write Access        read/write
+  LV Creation host, time rocky, 2026-11-12 11:40:02 +0200
+  LV Status              available
+  # open                 1
+  LV Size                252.00 MiB
+  Current LE             63
+  Segments               2
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:3
+
+[root@rocky ~]# date
+Thu Nov 12 12:19:29 PM EET 2026
+[root@rocky ~]# date
+Thu Nov 12 12:19:32 PM EET 2026
+[root@rocky ~]# cat /proc/mdstat
+Personalities : [raid1]
+md0 : active raid1 loop3[1] loop2[0]
+      306176 blocks super 1.2 [2/2] [UU]
+      bitmap: 0/1 pages [0KB], 65536KB chunk
+
+unused devices: <none>
+[root@rocky ~]# mdadm --detail /dev/md0
+/dev/md0:
+           Version : 1.2
+     Creation Time : Thu Nov 12 12:09:44 2026
+        Raid Level : raid1
+        Array Size : 306176 (299.00 MiB 313.52 MB)
+     Used Dev Size : 306176 (299.00 MiB 313.52 MB)
+      Raid Devices : 2
+     Total Devices : 2
+       Persistence : Superblock is persistent
+
+     Intent Bitmap : Internal
+
+       Update Time : Thu Nov 12 12:09:46 2026
+             State : clean
+    Active Devices : 2
+   Working Devices : 2
+    Failed Devices : 0
+     Spare Devices : 0
+
+Consistency Policy : bitmap
+
+              Name : rocky:0  (local to host rocky)
+              UUID : a69e1647:b07c388a:44b0561e:aade211d
+            Events : 17
+
+    Number   Major   Minor   RaidDevice State
+       0       7        2        0      active sync   /dev/loop2
+       1       7        3        1      active sync   /dev/loop3
+[root@rocky ~]# mkfs -t xfs /dev/md0
+Filesystem should be larger than 300MB.
+Log size should be at least 64MB.
+Support for filesystems like this one is deprecated and they will not be supported in future releases.
+meta-data=/dev/md0               isize=512    agcount=4, agsize=19136 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
+data     =                       bsize=4096   blocks=76544, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1368, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+Discarding blocks...Done.
+[root@rocky ~]# mkdir -p /mnt/raid
+[root@rocky ~]# mount /dev/md0 /mnt/raid
+[root@rocky ~]# df -hT /mnt/raid
+Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/md0       xfs   294M   18M  277M   6% /mnt/raid
+[root@rocky ~]# echo "data before the failure" > /mnt/raid/data.txt
+[root@rocky ~]# date
+Thu Nov 12 12:25:43 PM EET 2026
+[root@rocky ~]# mdadm --manage /dev/md0 --fail /dev/loop3
+[root@rocky ~]# cat /proc/mdstat
+Personalities : [raid1]
+md0 : active raid1 loop3[1](F) loop2[0]
+      306176 blocks super 1.2 [2/1] [U_]
+      bitmap: 1/1 pages [4KB], 65536KB chunk
+
+unused devices: <none>
+[root@rocky ~]# mdadm --detail /dev/md0
+/dev/md0:
+           Version : 1.2
+     Creation Time : Thu Nov 12 12:09:44 2026
+        Raid Level : raid1
+        Array Size : 306176 (299.00 MiB 313.52 MB)
+     Used Dev Size : 306176 (299.00 MiB 313.52 MB)
+      Raid Devices : 2
+     Total Devices : 2
+       Persistence : Superblock is persistent
+
+     Intent Bitmap : Internal
+
+       Update Time : Thu Nov 12 12:26:31 2026
+             State : clean, degraded
+    Active Devices : 1
+   Working Devices : 1
+    Failed Devices : 1
+     Spare Devices : 0
+
+Consistency Policy : bitmap
+
+              Name : rocky:0  (local to host rocky)
+              UUID : a69e1647:b07c388a:44b0561e:aade211d
+            Events : 21
+
+    Number   Major   Minor   RaidDevice State
+       0       7        2        0      active sync   /dev/loop2
+       -       0        0        1      removed
+
+       1       7        3        -      faulty   /dev/loop3
+[root@rocky ~]# cat /mnt/raid/data.txt
+data before the failure
+[root@rocky ~]# # Used mdadm --manage /dev/mdx --fail /dev/faileddisk to tell RAID that one of the disks linked to the array RAID level 1 had failed (as an alternative to emulate a removed or damaged disk in a virtual env). Now using mdadm --detail /dev/md0, to check the RAID status, the state changed to degraded and /dev/loop3 simulated disk has the degraded status (it has  fewer disk that the minimum required - 2 for RAID 1 mirror). One more disk failure on the other /dev/loop2 and the data is lost. A new disk to be added to the md0 array to reentablish the mirroring function.
+[root@rocky ~]# date
+Thu Nov 12 12:37:27 PM EET 2026
+[root@rocky ~]# date
+Thu Nov 12 12:41:58 PM EET 2026
+[root@rocky ~]# mdadm --manage /dev/md0 --remove /dev/loop3
+mdadm: hot removed /dev/loop3 from /dev/md0
+[root@rocky ~]# cat /proc/mdstat
+Personalities : [raid1]
+md0 : active raid1 loop2[0]
+      306176 blocks super 1.2 [2/1] [U_]
+      bitmap: 1/1 pages [4KB], 65536KB chunk
+
+unused devices: <none>
+[root@rocky ~]# mdadm --manage /dev/md0 --add /dev/loop4
+mdadm: added /dev/loop4
+[root@rocky ~]# cat /proc/mdstat
+Personalities : [raid1]
+md0 : active raid1 loop4[2] loop2[0]
+      306176 blocks super 1.2 [2/2] [UU]
+      bitmap: 0/1 pages [0KB], 65536KB chunk
+
+unused devices: <none>
+[root@rocky ~]# cat /proc/mdstat
+Personalities : [raid1]
+md0 : active raid1 loop4[2] loop2[0]
+      306176 blocks super 1.2 [2/2] [UU]
+      bitmap: 0/1 pages [0KB], 65536KB chunk
+
+unused devices: <none>
+[root@rocky ~]# mdadm --detail /dev/md0
+/dev/md0:
+           Version : 1.2
+     Creation Time : Thu Nov 12 12:09:44 2026
+        Raid Level : raid1
+        Array Size : 306176 (299.00 MiB 313.52 MB)
+     Used Dev Size : 306176 (299.00 MiB 313.52 MB)
+      Raid Devices : 2
+     Total Devices : 2
+       Persistence : Superblock is persistent
+
+     Intent Bitmap : Internal
+
+       Update Time : Thu Nov 12 12:43:44 2026
+             State : clean
+    Active Devices : 2
+   Working Devices : 2
+    Failed Devices : 0
+     Spare Devices : 0
+
+Consistency Policy : bitmap
+
+              Name : rocky:0  (local to host rocky)
+              UUID : a69e1647:b07c388a:44b0561e:aade211d
+            Events : 49
+
+    Number   Major   Minor   RaidDevice State
+       0       7        2        0      active sync   /dev/loop2
+       2       7        4        1      active sync   /dev/loop4
+[root@rocky ~]# cat /mnt/raid/data.txt
+data before the failure
+[root@rocky ~]# date
+Thu Nov 12 12:45:33 PM EET 2026
+[root@rocky ~]# date
+Thu Nov 12 12:46:47 PM EET 2026
+[root@rocky ~]# cat /proc/mdstat
+Personalities : [raid1]
+md0 : active raid1 loop4[2] loop2[0]
+      306176 blocks super 1.2 [2/2] [UU]
+      bitmap: 0/1 pages [0KB], 65536KB chunk
+
+unused devices: <none>
+[root@rocky ~]# date
+Thu Nov 12 12:55:37 PM EET 2026
+[root@rocky ~]# bash /home/damian/inc.sh
+TICKET: after last night's maintenance the app on rocky
+cannot write its logs. /mnt/logs should be its own volume.
+Find out why. Fix it so it survives a reboot.
+Diagnose first.
+[root@rocky ~]# df -hT
+Filesystem             Type      Size  Used Avail Use% Mounted on
+devtmpfs               devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                  tmpfs     1.8G     0  1.8G   0% /dev/shm
+tmpfs                  tmpfs     732M  8.6M  723M   2% /run
+/dev/mapper/rlm-root   xfs        17G  3.3G   14G  19% /
+/dev/sda1              xfs       960M  497M  464M  52% /boot
+tmpfs                  tmpfs     366M     0  366M   0% /run/user/1000
+/dev/mapper/labvg-data xfs       636M   50M  587M   8% /mnt/data
+/dev/md0               xfs       294M   18M  277M   6% /mnt/raid
+[root@rocky ~]# lsblk -f
+NAME         FSTYPE   FSVER    LABEL   UUID                                   FSAVAIL FSUSE% MOUNTPOINTS
+loop0        LVM2_mem LVM2 001         em07rF-mL4j-0bZG-Wulq-pCSD-Lcuk-lQi6E6
+├─labvg-data xfs                       98a96710-9d24-457d-a025-96704260d147    586.5M     8% /mnt/data
+└─labvg-logs ext4     1.0              c7c4353b-a233-4a80-8142-476f5113a5f7
+loop1        LVM2_mem LVM2 001         W0HB7e-YBfK-qZWl-vblV-WOt5-CJo3-MKFWpM
+├─labvg-data xfs                       98a96710-9d24-457d-a025-96704260d147    586.5M     8% /mnt/data
+└─labvg-logs ext4     1.0              c7c4353b-a233-4a80-8142-476f5113a5f7
+loop2        linux_ra 1.2      rocky:0 a69e1647-b07c-388a-44b0-561eaade211d
+└─md0        xfs                       eea98b51-ba4d-41e8-8f24-2fe5429aa01a    276.4M     6% /mnt/raid
+loop3        linux_ra 1.2      rocky:0 a69e1647-b07c-388a-44b0-561eaade211d
+loop4        linux_ra 1.2      rocky:0 a69e1647-b07c-388a-44b0-561eaade211d
+└─md0        xfs                       eea98b51-ba4d-41e8-8f24-2fe5429aa01a    276.4M     6% /mnt/raid
+sda
+├─sda1       xfs                       188e5165-0c0a-43d1-aae6-200370f664f3    463.2M    52% /boot
+└─sda2       LVM2_mem LVM2 001         lCtUQ4-MkPD-cX7J-jxFd-Nwrd-rTHR-RWs1Dk
+  ├─rlm-root xfs                       6458d5f1-030e-4397-a1b6-0983fee3d6bf     13.7G    19% /
+  └─rlm-swap swap     1                ef60f5f4-0fbf-4a57-bf37-ff484dd882ce                  [SWAP]
+sr0
+[root@rocky ~]# cat /etc/fstab
+
+#
+# /etc/fstab
+# Created by anaconda on Wed Jul 29 17:49:02 2026
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk/'.
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
+#
+# After editing this file, run 'systemctl daemon-reload' to update systemd
+# units generated from this file.
+#
+/dev/mapper/rlm-root    /                       xfs     defaults        0 0
+UUID=188e5165-0c0a-43d1-aae6-200370f664f3 /boot                   xfs     defaults        0 0
+/dev/mapper/rlm-swap    none                    swap    defaults        0 0
+UUID=98a96710-9d24-457d-a025-96704260d147 /mnt/data xfs defaults,nofail 0 0
+UUID=ed492aba-4677-4624-aab5-bc69b5976eed /mnt/logs ext4 defaults,nofail 0 2
+[root@rocky ~]# blkid
+/dev/mapper/rlm-root: UUID="6458d5f1-030e-4397-a1b6-0983fee3d6bf" TYPE="xfs"
+/dev/sda2: UUID="lCtUQ4-MkPD-cX7J-jxFd-Nwrd-rTHR-RWs1Dk" TYPE="LVM2_member" PARTUUID="f6ba7e22-02"
+/dev/mapper/labvg-data: UUID="98a96710-9d24-457d-a025-96704260d147" TYPE="xfs"
+/dev/mapper/labvg-logs: UUID="c7c4353b-a233-4a80-8142-476f5113a5f7" TYPE="ext4"
+/dev/loop1: UUID="W0HB7e-YBfK-qZWl-vblV-WOt5-CJo3-MKFWpM" TYPE="LVM2_member"
+/dev/mapper/rlm-swap: UUID="ef60f5f4-0fbf-4a57-bf37-ff484dd882ce" TYPE="swap"
+/dev/loop4: UUID="a69e1647-b07c-388a-44b0-561eaade211d" UUID_SUB="18c27462-d694-cf58-ebe2-8572c75548da" LABEL="rocky:0" TYPE="linux_raid_member"
+/dev/md0: UUID="eea98b51-ba4d-41e8-8f24-2fe5429aa01a" TYPE="xfs"
+/dev/loop2: UUID="a69e1647-b07c-388a-44b0-561eaade211d" UUID_SUB="fac6b119-affe-b5f8-5c29-3ab72f0a29ec" LABEL="rocky:0" TYPE="linux_raid_member"
+/dev/loop0: UUID="em07rF-mL4j-0bZG-Wulq-pCSD-Lcuk-lQi6E6" TYPE="LVM2_member"
+/dev/sda1: UUID="188e5165-0c0a-43d1-aae6-200370f664f3" TYPE="xfs" PARTUUID="f6ba7e22-01"
+/dev/loop3: UUID="a69e1647-b07c-388a-44b0-561eaade211d" UUID_SUB="31fd5efe-b793-b594-e98e-132ce7920988" LABEL="rocky:0" TYPE="linux_raid_member"
+[root@rocky ~]# mount -a
+[root@rocky ~]# # logs disk not mounted, fstab and blkid UUID dont match.
+[root@rocky ~]# cp /etc/fstab.prebreak /etc/fstab
+cp: overwrite '/etc/fstab'? y
+[root@rocky ~]# cat /etc/fstab
+
+#
+# /etc/fstab
+# Created by anaconda on Wed Jul 29 17:49:02 2026
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk/'.
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
+#
+# After editing this file, run 'systemctl daemon-reload' to update systemd
+# units generated from this file.
+#
+/dev/mapper/rlm-root    /                       xfs     defaults        0 0
+UUID=188e5165-0c0a-43d1-aae6-200370f664f3 /boot                   xfs     defaults        0 0
+/dev/mapper/rlm-swap    none                    swap    defaults        0 0
+UUID=98a96710-9d24-457d-a025-96704260d147 /mnt/data xfs defaults,nofail 0 0
+UUID=c7c4353b-a233-4a80-8142-476f5113a5f7 /mnt/logs ext4 defaults,nofail 0 2
+[root@rocky ~]# systemctl daemon-reload
+[root@rocky ~]# mount -a
+[root@rocky ~]# df -hT
+Filesystem             Type      Size  Used Avail Use% Mounted on
+devtmpfs               devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                  tmpfs     1.8G     0  1.8G   0% /dev/shm
+tmpfs                  tmpfs     732M  8.6M  723M   2% /run
+/dev/mapper/rlm-root   xfs        17G  3.3G   14G  19% /
+/dev/sda1              xfs       960M  497M  464M  52% /boot
+tmpfs                  tmpfs     366M     0  366M   0% /run/user/1000
+/dev/mapper/labvg-data xfs       636M   50M  587M   8% /mnt/data
+/dev/md0               xfs       294M   18M  277M   6% /mnt/raid
+/dev/mapper/labvg-logs ext4      230M   14K  215M   1% /mnt/logs
+[root@rocky ~]# date
+Thu Nov 12 01:01:55 PM EET 2026
+[root@rocky ~]# date
+Thu Nov 12 01:03:19 PM EET 2026
+[root@rocky ~]# df -hT /mnt/logs
+Filesystem             Type  Size  Used Avail Use% Mounted on
+/dev/mapper/labvg-logs ext4  230M   14K  215M   1% /mnt/logs
+[root@rocky ~]# cat /home/damian/inc.sh
+#!/bin/bash
+# lab01 incident break script, written by Claude
+cp /etc/fstab /etc/fstab.prebreak
+NEW=$(cat /proc/sys/kernel/random/uuid)
+sed -i "/ \/mnt\/logs /s/UUID=[^ ]*/UUID=$NEW/" /etc/fstab
+systemctl daemon-reload
+umount /mnt/logs
+cat > /root/lab01/ticket.txt <<'TXT'
+TICKET: after last night's maintenance the app on rocky
+cannot write its logs. /mnt/logs should be its own volume.
+Find out why. Fix it so it survives a reboot.
+Diagnose first.
+TXT
+cat /root/lab01/ticket.txt
+[root@rocky ~]# cp /etc/fstab.lab01.bak /etc/fstab
+cp: overwrite '/etc/fstab'? y
+[root@rocky ~]# systemctl daemon-reload
+[root@rocky ~]# umount /mnt/raid /mnt/data /mnt/logs
+[root@rocky ~]# mdadm --stop /dev/m
+mapper/ mcelog  md0     mem     mqueue/
+[root@rocky ~]# mdadm --stop /dev/md0
+mdadm: stopped /dev/md0
+[root@rocky ~]# mdadm --zero-superblock /dev/loop2 /dev/loop3 /dev/loop4
+[root@rocky ~]# lvmremove -y /dev/labvg/data /dev/labvg/logs
+-bash: lvmremove: command not found
+[root@rocky ~]# lvremove -y /dev/labvg/data /dev/labvg/logs
+  Logical volume "data" successfully removed.
+  Logical volume "logs" successfully removed.
+[root@rocky ~]# vgremove labvg
+  Volume group "labvg" successfully removed
+[root@rocky ~]# pvremove /dev/loop0 /dev/loop1
+  Labels on physical volume "/dev/loop0" successfully wiped.
+  Labels on physical volume "/dev/loop1" successfully wiped.
+[root@rocky ~]# losetup -d /dev/loop0 /dev/loop1 /dev/loop2 /dev/loop3 /dev/loop4
+[root@rocky ~]# rm -rf /root/lab01
+[root@rocky ~]# rm -f /etc/fstab.prebreak /etc/fstab.lab01.bak /home/damian/inc.sh
+[root@rocky ~]# rmdir /mnt/raid
+[root@rocky ~]# lsblk
+NAME         MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda            8:0    0   20G  0 disk
+├─sda1         8:1    0    1G  0 part /boot
+└─sda2         8:2    0   19G  0 part
+  ├─rlm-root 253:0    0   17G  0 lvm  /
+  └─rlm-swap 253:1    0    2G  0 lvm  [SWAP]
+sr0           11:0    1 1024M  0 rom
+[root@rocky ~]# losetup -a
+[root@rocky ~]# vgs
+  VG  #PV #LV #SN Attr   VSize   VFree
+  rlm   1   2   0 wz--n- <19.00g    0
+[root@rocky ~]# cat /proc/mdstat
+Personalities : [raid1]
+unused devices: <none>
+[root@rocky ~]# df -hT
+Filesystem           Type      Size  Used Avail Use% Mounted on
+devtmpfs             devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                tmpfs     1.8G     0  1.8G   0% /dev/shm
+tmpfs                tmpfs     732M  8.6M  723M   2% /run
+/dev/mapper/rlm-root xfs        17G  2.8G   15G  17% /
+/dev/sda1            xfs       960M  497M  464M  52% /boot
+tmpfs                tmpfs     366M     0  366M   0% /run/user/1000
+[root@rocky ~]# date
+Thu Nov 12 01:08:09 PM EET 2026
+[root@rocky ~]# exit
+logout
+damian@rocky:~$ exit
+exit
+
+Script done on 2026-11-12 13:08:16+02:00 [COMMAND_EXIT_CODE="0"]
