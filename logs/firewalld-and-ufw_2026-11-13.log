@@ -1,0 +1,199 @@
+Script started on 2026-11-13 15:02:10+02:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="132" LINES="51"]
+damian@ubuntu:~$ date
+Fri Nov 13 03:02:14 PM EET 2026
+damian@ubuntu:~$ # in this lab i will reproduce the error i found by
+# chance in october 2026. while learning ufw and
+# firewalld i tried to prove firewalld is not installed
+# on ubuntu. it was in fact installed and running,
+# probably from an older session when a rocky system
+# was unavailable to me, so an older install of
+# firewalld was still present on ubuntu. therefore any
+# packet this system received had to comply with both
+# firewalld and ufw rules, and firewalld running on an
+# ubuntu system would easily pass unnoticed when
+# troubleshooting a drop/deny packet issue
+damian@ubuntu:~$ sudo ufw status verbose
+[sudo] password for damian:
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere
+443/tcp                    ALLOW IN    Anywhere
+22/tcp (v6)                ALLOW IN    Anywhere (v6)
+443/tcp (v6)               ALLOW IN    Anywhere (v6)
+
+damian@ubuntu:~$ systemctl status firewalld --no-pager
+○ firewalld.service - firewalld - dynamic firewall daemon
+     Loaded: loaded (/usr/lib/systemd/system/firewalld.service; disabled; preset: enabled)
+     Active: inactive (dead)
+       Docs: man:firewalld(1)
+damian@ubuntu:~$ sudo firewall-cmd --state
+not running
+damian@ubuntu:~$ sudo ss -tlnp
+State            Recv-Q           Send-Q                       Local Address:Port                       Peer Address:Port           Process
+LISTEN           0                4096                            127.0.0.54:53                              0.0.0.0:*               users:(("systemd-resolve",pid=596,fd=17))
+LISTEN           0                4096                             127.0.0.1:631                             0.0.0.0:*               users:(("cupsd",pid=1322,fd=7))
+LISTEN           0                511                                0.0.0.0:80                              0.0.0.0:*               users:(("nginx",pid=1378,fd=5),("nginx",pid=1377,fd=5),("nginx",pid=1375,fd=5))
+LISTEN           0                4096                               0.0.0.0:22                              0.0.0.0:*               users:(("sshd",pid=2420,fd=3),("systemd",pid=1,fd=181))
+LISTEN           0                4096                         127.0.0.53%lo:53                              0.0.0.0:*               users:(("systemd-resolve",pid=596,fd=15))
+LISTEN           0                4096                                 [::1]:631                                [::]:*               users:(("cupsd",pid=1322,fd=6))
+LISTEN           0                511                                   [::]:80                                 [::]:*               users:(("nginx",pid=1378,fd=6),("nginx",pid=1377,fd=6),("nginx",pid=1375,fd=6))
+LISTEN           0                4096                                  [::]:22                                 [::]:*               users:(("sshd",pid=2420,fd=4),("systemd",pid=1,fd=182))
+damian@ubuntu:~$ sudo systemctl disable --now firewalld
+damian@ubuntu:~$ # turning firewalld back on, enabled and running. ufw stays on
+damian@ubuntu:~$ date
+Fri Nov 13 03:07:05 PM EET 2026
+damian@ubuntu:~$ sudo systemctl enable --now firewalld
+Created symlink /etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service → /usr/lib/systemd/system/firewalld.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/firewalld.service → /usr/lib/systemd/system/firewalld.service.
+damian@ubuntu:~$ systemctl status firewalld --no-pager
+● firewalld.service - firewalld - dynamic firewall daemon
+     Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-11-13 15:07:13 EET; 12s ago
+       Docs: man:firewalld(1)
+   Main PID: 3013 (firewalld)
+      Tasks: 2 (limit: 3423)
+     Memory: 29.6M (peak: 29.8M)
+        CPU: 532ms
+     CGroup: /system.slice/firewalld.service
+             └─3013 /usr/bin/python3 /usr/sbin/firewalld --nofork --nopid
+
+Nov 13 15:07:13 ubuntu systemd[1]: Starting firewalld.service - firewalld - dynamic firewall daemon...
+Nov 13 15:07:13 ubuntu systemd[1]: Started firewalld.service - firewalld - dynamic firewall daemon.
+damian@ubuntu:~$ sudo firewall-cmd --state
+running
+damian@ubuntu:~$ sudo ufw status
+Status: active
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW       Anywhere
+443/tcp                    ALLOW       Anywhere
+22/tcp (v6)                ALLOW       Anywhere (v6)
+443/tcp (v6)               ALLOW       Anywhere (v6)
+
+damian@ubuntu:~$ sudo firewall-cmd --list-all
+public (default, active)
+  target: default
+  ingress-priority: 0
+  egress-priority: 0
+  icmp-block-inversion: no
+  interfaces: enp0s3 enp0s8
+  sources:
+  services: dhcpv6-client https ssh
+  ports:
+  protocols:
+  forward: yes
+  masquerade: no
+  forward-ports:
+  source-ports:
+  icmp-blocks:
+  rich rules:
+damian@ubuntu:~$ ls -l /etc/firewalld/zones/
+ls: cannot access '/etc/firewalld/zones/': Permission denied
+damian@ubuntu:~$ sudo ls -l /etc/firewalld/zones/
+total 8
+-rw-r--r-- 1 root root 354 Jul 19 13:58 public.xml
+-rw-r--r-- 1 root root 379 Jul 19 13:34 public.xml.old
+damian@ubuntu:~$ # opening 80 in ufw for nginx so ufw
+# says allow. i expect rocky to still fail because
+# port 80 is missing from firewalld zones
+damian@ubuntu:~$ sudo ufw allow 80/tcp
+Rule added
+Rule added (v6)
+damian@ubuntu:~$ sudo ufw status
+Status: active
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW       Anywhere
+443/tcp                    ALLOW       Anywhere
+80/tcp                     ALLOW       Anywhere
+22/tcp (v6)                ALLOW       Anywhere (v6)
+443/tcp (v6)               ALLOW       Anywhere (v6)
+80/tcp (v6)                ALLOW       Anywhere (v6)
+
+damian@ubuntu:~$ ssh rocky curl -sS -m 5 -I http://ubuntu
+damian@rocky's password:
+curl: (7) Failed to connect to ubuntu port 80: No route to host
+damian@ubuntu:~$ ssh rocky ping -c 2 ubuntu
+damian@rocky's password:
+PING log01 (192.168.56.102) 56(84) bytes of data.
+64 bytes from log01 (192.168.56.102): icmp_seq=1 ttl=64 time=1.03 ms
+64 bytes from log01 (192.168.56.102): icmp_seq=2 ttl=64 time=0.937 ms
+
+--- log01 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1006ms
+rtt min/avg/max/mdev = 0.937/0.985/1.034/0.048 ms
+damian@ubuntu:~$ # rocky got err 7 on port 80 no route to host
+# because the packet was rejected. pings worked so its
+# not a routing issue, ubuntu is reachable and
+# firewalld is rejecting the packet. ufw has port 80
+# configured with allow but on ubuntu both firewalld
+# and ufw are running with different configurations
+# and firewalld has no port 80. any packet has to go
+# through 2 firewalls so it has to comply with both
+# firewalls rules. the fix is to disable, mask or
+# remove firewalld from ubuntu because the standard
+# ubuntu firewall is ufw
+damian@ubuntu:~$ sudo systemctl disable --now firewalld
+Removed "/etc/systemd/system/multi-user.target.wants/firewalld.service".
+Removed "/etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service".
+damian@ubuntu:~$ date
+Fri Nov 13 03:27:05 PM EET 2026
+damian@ubuntu:~$ ssh rocky curl -sS -m 5 -I http://ubuntu
+damian@rocky's password:
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Fri, 13 Nov 2026 13:27:17 GMT
+Content-Type: text/html
+Content-Length: 615
+Last-Modified: Thu, 04 Jun 2026 12:55:48 GMT
+Connection: keep-alive
+ETag: "6a2175d4-267"
+Accept-Ranges: bytes
+
+damian@ubuntu:~$ # cleaning the env to the start state, removing the
+# 80 rule, ufw only, firewalld off and disabled
+damian@ubuntu:~$ sudo ufw delete allow 80/tcp
+Rule deleted
+Rule deleted (v6)
+damian@ubuntu:~$ sudo ufw status verbose
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere
+443/tcp                    ALLOW IN    Anywhere
+22/tcp (v6)                ALLOW IN    Anywhere (v6)
+443/tcp (v6)               ALLOW IN    Anywhere (v6)
+
+damian@ubuntu:~$ systemctl status firewalld --no-pager
+○ firewalld.service - firewalld - dynamic firewall daemon
+     Loaded: loaded (/usr/lib/systemd/system/firewalld.service; disabled; preset: enabled)
+     Active: inactive (dead)
+       Docs: man:firewalld(1)
+
+Nov 13 15:07:13 ubuntu systemd[1]: Starting firewalld.service - firewalld - dynamic firewall daemon...
+Nov 13 15:07:13 ubuntu systemd[1]: Started firewalld.service - firewalld - dynamic firewall daemon.
+Nov 13 15:26:57 ubuntu systemd[1]: Stopping firewalld.service - firewalld - dynamic firewall daemon...
+Nov 13 15:26:57 ubuntu systemd[1]: firewalld.service: Deactivated successfully.
+Nov 13 15:26:57 ubuntu systemd[1]: Stopped firewalld.service - firewalld - dynamic firewall daemon.
+damian@ubuntu:~$ sudo firewall-cmd --state
+not running
+damian@ubuntu:~$ ssh rocky curl -sS -m 5 -I http://ubuntu
+damian@rocky's password:
+curl: (28) Connection timed out after 5003 milliseconds
+damian@ubuntu:~$ date
+Fri Nov 13 03:37:16 PM EET 2026
+damian@ubuntu:~$ exit
+exit
+
+Script done on 2026-11-13 15:37:23+02:00 [COMMAND_EXIT_CODE="0"]
