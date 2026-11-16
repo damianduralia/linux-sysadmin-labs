@@ -85,7 +85,7 @@ Filesystem             Type      Size  Used Avail Use% Mounted on
 /dev/mapper/labvg-logs ext4      230M   14K  215M   1% /mnt/logs
 ```
 
-Restored the backup the break script left (/etc/fstab.prebreak) then daemon-reload and mount -a. Logs LV mounted in ~6 min. Read the break script after that and that confirmed the right diagnosis and fix.
+Restored fstab from the backup file, daemon-reload, mount -a, logs mounted. Fixed in 6 min. Read the break script after, my diagnosis was right.
 
 First run Oct 2026. Rerun + logged in Nov 2026
 
